@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "../supabase";
+import { getSupabase } from "../supabase";
 
 export default function Auth({
   onAuthenticated,
@@ -20,6 +20,7 @@ export default function Auth({
     setLoading(true);
     setError(null);
     try {
+      const supabase = getSupabase();
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
