@@ -61,9 +61,15 @@ Supabase para firmar los tokens: Project Settings → API → JWT Settings → "
 
 1. En Supabase, ve a **Authentication → Providers → Email**.
 2. Actívalo (viene habilitado por defecto con "Email" + contraseña).
-3. Opcionalmente desactiva la confirmación por email para pruebas
-   (**Authentication → Settings → Email → Confirm email**: desactivado).
-4. Como `JWT_SECRET` en Render usa el mismo secreto de **JWT Settings** para que
+3. Configura las URLs para que el email de confirmación apunte a tu dominio real
+   (por defecto Supabase usa `http://localhost:3000`, que rompe el registro):
+   - **Authentication → URL Configuration → Site URL** → `https://fitnasam-web.onrender.com`
+   - **Authentication → URL Configuration → Redirect URLs** → añade `https://fitnasam-web.onrender.com/**`
+     (y, para desarrollo local, `http://localhost:5173/**`)
+4. Para que el registro sea inmediato (registrarse y entrar sin email de
+   confirmación), desactiva **"Confirm email"**:
+   **Authentication → Settings → Email → Confirm email → desactivado**.
+5. Como `JWT_SECRET` en Render usa el mismo secreto de **JWT Settings** para que
    FastAPI valide los tokens HS256 emitidos por Supabase Auth.
 
 ---
