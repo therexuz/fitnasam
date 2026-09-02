@@ -254,7 +254,8 @@ async def calculate_goals(payload: MacroTargetsRequest):
     bmi_value = nutrition.bmi(payload.peso_kg, payload.altura_cm)
     tmb_value = nutrition.tmb(sexo, payload.peso_kg, payload.altura_cm, payload.edad)
     tdee_value = nutrition.tdee(tmb_value, payload.factor_actividad)
-    targets = nutrition.macro_targets(payload.peso_kg, tdee_value)
+    deficit_fraction = payload.deficit_percent / 100
+    targets = nutrition.macro_targets(payload.peso_kg, tdee_value, deficit_fraction)
 
     return NutritionCalcResult(
         bmi=bmi_value,
@@ -264,6 +265,7 @@ async def calculate_goals(payload: MacroTargetsRequest):
         protein_g=targets["protein_g"],
         carbs_g=targets["carbs_g"],
         fat_g=targets["fat_g"],
+        deficit_percent=payload.deficit_percent,
     )
 
 
