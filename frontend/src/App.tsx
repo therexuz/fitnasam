@@ -5,7 +5,7 @@ import Registro from "./screens/Registro";
 import Escaneo from "./screens/Escaneo";
 import Perfil from "./screens/Perfil";
 import Auth from "./screens/Auth";
-import { supabase } from "./supabase";
+import { getSupabase } from "./supabase";
 import { setAuthToken } from "./api";
 import type { Tab } from "./types";
 
@@ -13,8 +13,18 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("resumen");
   const [sessionReady, setSessionReady] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
 
   useEffect(() => {
+    let supabase;
+    try {
+      supabase = getSupabase();
+    } catch (err) {
+      setConfigError((err as Error).message);
+      setSessionReady(true);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data }) => {
       const token = data.session?.access_token ?? null;
       setAuthToken(token);
@@ -32,12 +42,22 @@ export default function App() {
   }, []);
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    await getSupabase().auth.signOut();
     setTab("resumen");
   }
 
   if (!sessionReady) {
     return <p className="muted" style={{ padding: 24 }}>Cargando…</p>;
+  }
+
+  if (configError) {
+    return (
+      <div className="app">
+        <main className="main">
+          <p className="error">{configError}</p>
+        </main>
+      </div>
+    );
   }
 
   if (!authenticated) {
