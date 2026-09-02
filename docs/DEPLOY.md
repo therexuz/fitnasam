@@ -22,6 +22,9 @@ Guía paso a paso para poner fitnasam en producción. La arquitectura es:
 2. Pégalo en el **SQL Editor** de Supabase y ejecútalo.
 3. Verifica que se hayan creado las tablas `users`, `foods`, `food_entries` y `daily_goals`.
 4. Luego abre `backend/migrations/002_rls.sql` y ejecútalo también.
+5. Por último ejecuta `backend/migrations/003_handle_new_user.sql` para que al
+   registrarse un usuario en Supabase Auth se cree automáticamente su fila en
+   `public.users` (con el UUID de `auth.users`).
 
 > El cómputo vive en FastAPI; estas migraciones solo definen el esquema de
 > almacenamiento y la seguridad (RLS). `002_rls.sql` habilita **Row Level Security**
@@ -51,7 +54,17 @@ En **Project Settings → Database → Connection string**:
 
 > Importante: usa siempre el **connection pooler (6543)**, no el puerto directo 5432.
 
-También genera un secreto para `JWT_SECRET` (cualquier string largo y aleatorio).
+También genera un secreto para `JWT_SECRET` (este debe ser el mismo que usa
+Supabase para firmar los tokens: Project Settings → API → JWT Settings → "JWT secret").
+
+## 3.1 Habilitar el login (Email)
+
+1. En Supabase, ve a **Authentication → Providers → Email**.
+2. Actívalo (viene habilitado por defecto con "Email" + contraseña).
+3. Opcionalmente desactiva la confirmación por email para pruebas
+   (**Authentication → Settings → Email → Confirm email**: desactivado).
+4. Como `JWT_SECRET` en Render usa el mismo secreto de **JWT Settings** para que
+   FastAPI valide los tokens HS256 emitidos por Supabase Auth.
 
 ---
 
@@ -67,13 +80,16 @@ Variables del backend (`fitnasam-api`):
 - `SUPABASE_URL` — `https://<ref>.supabase.co`
 - `SUPABASE_ANON_KEY` — clave anon
 - `SUPABASE_SERVICE_ROLE_KEY` — clave service_role
-- `JWT_SECRET` — secreto HS256 (aleatorio)
+- `JWT_SECRET` — secreto HS256 (el **mismo** que Supabase usa para firmar los JWT; ver Project Settings → API → JWT Settings)
 - `OCR_TESSERACT_LANG` — `spa` (ya viene con valor por defecto)
-- `DEV_USER_ID` — solo para desarrollo local; en producción puedes dejarlo vacío o eliminarlo
+- `DEV_USER_ID` — **vacío** en producción (exige login real)
+- `CORS_ORIGINS` — `https://fitnasam-web.onrender.com` (origen del frontend)
 
 Variables del frontend (`fitnasam-web`):
 
-- `VITE_API_URL` — la URL pública del backend, por ejemplo `https://fitnasam-api.onrender.com`
+- `VITE_API_URL` — la URL pública del backend, por ejemplo `https://fitnasam-api.onrender.com/api`
+- `VITE_SUPABASE_URL` — `https://<ref>.supabase.co`
+- `VITE_SUPABASE_ANON_KEY` — la clave anon (se puede exponer; se usa solo para login en el cliente)
 
 ---
 
