@@ -11,6 +11,7 @@ export default function Auth({
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   async function handleSubmit() {
     if (!email.trim() || !password) {
@@ -19,6 +20,7 @@ export default function Auth({
     }
     setLoading(true);
     setError(null);
+    setInfo(null);
     try {
       const supabase = getSupabase();
       if (mode === "login") {
@@ -27,14 +29,21 @@ export default function Auth({
           password,
         });
         if (error) throw error;
+        onAuthenticated();
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
         });
         if (error) throw error;
+        if (data.session) {
+          onAuthenticated();
+        } else {
+          setInfo(
+            "Revisa tu email para confirmar tu cuenta y luego inicia sesión.",
+          );
+        }
       }
-      onAuthenticated();
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -76,6 +85,7 @@ export default function Auth({
         />
 
         {error && <p className="error">{error}</p>}
+        {info && <p className="success">{info}</p>}
 
         <button className="btn" onClick={handleSubmit} disabled={loading}>
           {loading

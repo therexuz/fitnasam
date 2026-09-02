@@ -83,6 +83,13 @@ Luego reinicia `npm run dev`.
 > el proveedor "Email" esté habilitado en Supabase (Authentication → Providers).
 > Al iniciar sesión, el token que obtiene `supabase-js` se envía a FastAPI como
 > `Authorization: Bearer`.
+>
+> Para que el **registro** funcione localmente sin quedar atascado en la
+> confirmación por email:
+> - **Authentication → URL Configuration → Site URL** → `http://localhost:5173`
+> - **Redirect URLs** → añade `http://localhost:5173/**`
+> - Desactivar **"Confirm email"** (`Authentication → Settings → Email → Confirm email`)
+>   para entrar directo tras registrarse.
 
 ---
 
