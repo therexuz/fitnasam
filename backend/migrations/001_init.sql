@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS daily_goals (
     protein_target_g DOUBLE PRECISION NOT NULL,
     carbs_target_g   DOUBLE PRECISION NOT NULL,
     fat_target_g     DOUBLE PRECISION NOT NULL,
+    deficit_percent  DOUBLE PRECISION NOT NULL DEFAULT 0,
     CONSTRAINT uq_daily_goals_user_date UNIQUE (user_id, date)
 );
 
