@@ -1,0 +1,29 @@
+"""Aplicación FastAPI de fitnasam.
+
+Autenticación: se valida el JWT de Supabase Auth (HS256 con JWT_SECRET) vía la
+dependencia `get_current_user_id` (ver app/api/deps.py). Si no llega token ni
+JWT_SECRET y existe DEV_USER_ID en el entorno, se usa un usuario de desarrollo
+("dev-user") para poder probar localmente sin base de Auth conectada.
+"""
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.routes import router
+
+app = FastAPI(title="fitnasam", version="0.1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(router, prefix="/api")
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
