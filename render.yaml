@@ -20,7 +20,9 @@ services:
       - key: OCR_TESSERACT_LANG
         value: spa
       - key: DEV_USER_ID
-        value: dev-user
+        value: ""
+      - key: CORS_ORIGINS
+        value: https://fitnasam-web.onrender.com
 
   - type: web
     name: fitnasam-web
@@ -30,4 +32,8 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
+        value: https://fitnasam-api.onrender.com/api
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
         sync: false

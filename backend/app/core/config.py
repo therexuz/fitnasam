@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     JWT_SECRET: str = ""
     OCR_TESSERACT_LANG: str = "spa"
     DEV_USER_ID: str = "dev-user"
+    CORS_ORIGINS: str = "http://localhost:5173"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
 
 settings = Settings()

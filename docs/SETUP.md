@@ -43,8 +43,9 @@ Variables (ver `.env.example`):
 
 > Si no tienes Supabase todavía, puedes dejar `SUPABASE_DB_URL` vacío y usar `DEV_USER_ID`
 > para probar endpoints que no requieran base de datos. Para datos reales, corre las
-> migraciones en Supabase (ver `docs/DEPLOY.md`): `001_init.sql` (esquema) y
-> `002_rls.sql` (RLS + revoke de PostgREST).
+> migraciones en Supabase (ver `docs/DEPLOY.md`): `001_init.sql` (esquema),
+> `002_rls.sql` (RLS + revoke de PostgREST) y `003_handle_new_user.sql` (crea
+> `public.users` al registrarse). No olvides `CORS_ORIGINS` con tu origen local.
 
 ### 1.2 Levantar el servidor
 
@@ -68,13 +69,20 @@ npm run dev
 
 La app queda en `http://localhost:5173` (Vite muestra la URL exacta).
 
-Para apuntar al backend local, crea un archivo `frontend/.env.local`:
+Para apuntar al backend local y a Supabase, crea un archivo `frontend/.env.local`:
 
 ```
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8000/api
+VITE_SUPABASE_URL=https://<ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon key>
 ```
 
 Luego reinicia `npm run dev`.
+
+> El frontend usa **login con email + contraseña** vía `supabase-js`. Necesitas que
+> el proveedor "Email" esté habilitado en Supabase (Authentication → Providers).
+> Al iniciar sesión, el token que obtiene `supabase-js` se envía a FastAPI como
+> `Authorization: Bearer`.
 
 ---
 

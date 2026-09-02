@@ -3,11 +3,10 @@
 import io
 import re
 
-from PIL import Image, ImageEnhance, ImageFilter
 import pytesseract
+from PIL import Image, ImageEnhance, ImageFilter
 
 from app.core.config import settings
-
 
 _KEYWORDS = {
     "kcal": re.compile(r"(kcal|\bcalor|energ)", re.IGNORECASE),

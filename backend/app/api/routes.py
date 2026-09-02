@@ -1,6 +1,6 @@
 """Endpoints de la API de fitnasam."""
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import select
@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user_id_required
 from app.core.database import get_db
-from app.models import Food, FoodEntry, DailyGoal, User
+from app.models import DailyGoal, Food, FoodEntry, User
 from app.schemas import (
     DailyGoalCreate,
     DailyGoalOut,
@@ -104,7 +104,7 @@ async def create_food_entry(
         user_id=user_id,
         food_id=food.id,
         grams=payload.grams,
-        date=payload.date or datetime.now(timezone.utc).date(),
+        date=payload.date or datetime.now(UTC).date(),
     )
     db.add(entry)
     await db.commit()
