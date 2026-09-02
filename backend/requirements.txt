@@ -11,4 +11,5 @@ pytesseract
 Pillow
 python-multipart
 PyJWT
+cryptography
 httpx

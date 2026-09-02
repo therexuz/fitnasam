@@ -1,14 +1,29 @@
-"""Dependencia de autenticación: valida JWT de Supabase Auth (HS256).
+"""Dependencia de autenticación: valida el JWT de Supabase Auth.
+
+Supabase firma los tokens con ES256 (clave pública vía JWKS). Se usa el JWKS
+endpoint para validar la firma; no se requiere compartir secretos.
 
 En desarrollo (si DEV_USER_ID está definido) se permite usar un usuario fijo sin
 token. En producción DEV_USER_ID debe ir vacío, de modo que toda petición exige
-un Bearer token válido firmado con JWT_SECRET.
+un Bearer token válido emitido por Supabase Auth.
 """
+
+from functools import lru_cache
 
 import jwt
 from fastapi import Depends, HTTPException, Request, status
 
 from app.core.config import settings
+
+
+def _jwks_url() -> str:
+    base = settings.SUPABASE_URL.rstrip("/")
+    return f"{base}/auth/v1/.well-known/jwks.json"
+
+
+@lru_cache(maxsize=1)
+def _jwks_client() -> jwt.PyJWKClient:
+    return jwt.PyJWKClient(_jwks_url())
 
 
 async def get_current_user_id(request: Request) -> str:
@@ -22,19 +37,20 @@ async def get_current_user_id(request: Request) -> str:
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Falta token de autorización"
         )
 
-    secret = settings.JWT_SECRET
-    if not secret:
+    if not settings.SUPABASE_URL:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="JWT_SECRET no configurado",
+            detail="SUPABASE_URL no configurado",
         )
 
     try:
+        signing_key = _jwks_client().get_signing_key_from_jwt(token)
         payload = jwt.decode(
             token,
-            secret,
-            algorithms=["HS256"],
-            options={"verify_aud": False},
+            signing_key.key,
+            algorithms=["ES256"],
+            audience="authenticated",
+            options={"verify_aud": True},
         )
     except jwt.PyJWTError:
         raise HTTPException(

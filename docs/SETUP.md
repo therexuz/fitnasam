@@ -34,10 +34,9 @@ Copy-Item .env.example .env
 Variables (ver `.env.example`):
 
 - `SUPABASE_DB_URL` — string del connection pooler de Supabase (puerto **6543**, `sslmode=require`)
-- `SUPABASE_URL` — `https://<ref>.supabase.co`
+- `SUPABASE_URL` — `https://<ref>.supabase.co` (necesario para validar JWKS)
 - `SUPABASE_ANON_KEY` — clave anon
 - `SUPABASE_SERVICE_ROLE_KEY` — clave service_role
-- `JWT_SECRET` — secreto HS256
 - `OCR_TESSERACT_LANG` — `spa`
 - `DEV_USER_ID` — id de usuario de desarrollo (permite probar sin Auth)
 

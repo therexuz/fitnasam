@@ -54,8 +54,9 @@ En **Project Settings → Database → Connection string**:
 
 > Importante: usa siempre el **connection pooler (6543)**, no el puerto directo 5432.
 
-También genera un secreto para `JWT_SECRET` (este debe ser el mismo que usa
-Supabase para firmar los tokens: Project Settings → API → JWT Settings → "JWT secret").
+El backend valida los tokens de Supabase Auth vía **JWKS** (firma ES256), por lo
+que no necesita secretos compartidos: solo `SUPABASE_URL` para derivar el endpoint
+`/auth/v1/.well-known/jwks.json`.
 
 ## 3.1 Habilitar el login (Email)
 
@@ -69,8 +70,6 @@ Supabase para firmar los tokens: Project Settings → API → JWT Settings → "
 4. Para que el registro sea inmediato (registrarse y entrar sin email de
    confirmación), desactiva **"Confirm email"**:
    **Authentication → Settings → Email → Confirm email → desactivado**.
-5. Como `JWT_SECRET` en Render usa el mismo secreto de **JWT Settings** para que
-   FastAPI valide los tokens HS256 emitidos por Supabase Auth.
 
 ---
 
@@ -83,10 +82,9 @@ que ingreses los valores; quedan guardados en el dashboard y **nunca se commitea
 Variables del backend (`fitnasam-api`):
 
 - `SUPABASE_DB_URL` — string del pooler (puerto 6543, `sslmode=require`)
-- `SUPABASE_URL` — `https://<ref>.supabase.co`
+- `SUPABASE_URL` — `https://<ref>.supabase.co` (necesario para validar JWKS)
 - `SUPABASE_ANON_KEY` — clave anon
 - `SUPABASE_SERVICE_ROLE_KEY` — clave service_role
-- `JWT_SECRET` — secreto HS256 (el **mismo** que Supabase usa para firmar los JWT; ver Project Settings → API → JWT Settings)
 - `OCR_TESSERACT_LANG` — `spa` (ya viene con valor por defecto)
 - `DEV_USER_ID` — **vacío** en producción (exige login real)
 - `CORS_ORIGINS` — `https://fitnasam-web.onrender.com` (origen del frontend)
@@ -144,5 +142,5 @@ El build de Vite inyecta `VITE_API_URL` en el bundle; debe apuntar al backend de
 ## Notas
 
 - El **free tier** de Render duerme los servicios tras inactividad; el primer request puede tardar ~50 s.
-- Nunca commitees `JWT_SECRET`, claves de Supabase ni strings de conexión. Usa `sync: false` / `.env.example`.
+- Nunca commitees claves de Supabase ni strings de conexión. Usa `sync: false` / `.env.example`.
 - Si necesitas editar variables, ve a **Environment** en el dashboard de Render (no al código).
