@@ -10,7 +10,7 @@ const ACTIVITY = [
   { value: "1.9", label: "Atleta (entrenamiento doble)" },
 ];
 
-export default function Perfil() {
+export default function Perfil({ onLogout }: { onLogout?: () => void }) {
   const [sexo, setSexo] = useState("hombre");
   const [peso, setPeso] = useState("");
   const [altura, setAltura] = useState("");
@@ -187,6 +187,12 @@ export default function Perfil() {
 
       {error && <p className="error">{error}</p>}
       {message && <p className="success">{message}</p>}
+
+      {onLogout && (
+        <button className="btn btn-outline" onClick={onLogout}>
+          Cerrar sesión
+        </button>
+      )}
     </section>
   );
 }

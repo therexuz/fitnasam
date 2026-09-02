@@ -47,6 +47,10 @@ body {
   gap: 14px;
 }
 
+.auth-screen {
+  padding-top: 32px;
+}
+
 .screen-header {
   display: flex;
   align-items: center;
