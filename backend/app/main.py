@@ -1,9 +1,9 @@
 """Aplicación FastAPI de fitnasam.
 
-Autenticación: se valida el JWT de Supabase Auth (HS256 con JWT_SECRET) vía la
-dependencia `get_current_user_id` (ver app/api/deps.py). Si no llega token ni
-JWT_SECRET y existe DEV_USER_ID en el entorno, se usa un usuario de desarrollo
-("dev-user") para poder probar localmente sin base de Auth conectada.
+Autenticación: se valida el JWT de Supabase Auth (ES256 vía JWKS) con la
+dependencia `get_current_user_id` (ver app/api/deps.py). Si no llega token y
+existe DEV_USER_ID en el entorno, se usa un usuario de desarrollo para probar
+localmente sin base de Auth conectada.
 """
 
 from fastapi import FastAPI
