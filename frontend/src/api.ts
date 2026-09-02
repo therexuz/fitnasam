@@ -1,10 +1,21 @@
+import { getSupabase } from "./supabase";
+
 const BASE_URL: string =
   import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 
-let authToken: string | null = null;
+let onUnauthorized: (() => void) | null = null;
 
-export function setAuthToken(token: string | null): void {
-  authToken = token;
+export function setOnUnauthorized(cb: (() => void) | null): void {
+  onUnauthorized = cb;
+}
+
+async function getToken(): Promise<string | null> {
+  try {
+    const { data } = await getSupabase().auth.getSession();
+    return data.session?.access_token ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export interface Food {
@@ -105,8 +116,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (options.body && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
-  if (authToken) {
-    headers.set("Authorization", `Bearer ${authToken}`);
+  const token = await getToken();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   let res: Response;
@@ -114,6 +126,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
   } catch {
     throw new Error("No se pudo conectar con el servidor. Revisa tu conexión.");
+  }
+
+  if (res.status === 401) {
+    if (onUnauthorized) onUnauthorized();
+    throw new Error("Sesión expirada. Inicia sesión de nuevo.");
   }
 
   if (!res.ok) {

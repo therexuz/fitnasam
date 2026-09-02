@@ -6,7 +6,7 @@ import Escaneo from "./screens/Escaneo";
 import Perfil from "./screens/Perfil";
 import Auth from "./screens/Auth";
 import { getSupabase } from "./supabase";
-import { setAuthToken } from "./api";
+import { setOnUnauthorized } from "./api";
 import type { Tab } from "./types";
 
 export default function App() {
@@ -25,16 +25,20 @@ export default function App() {
       return;
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      const token = data.session?.access_token ?? null;
-      setAuthToken(token);
-      setAuthenticated(Boolean(token));
-      setSessionReady(true);
+    setOnUnauthorized(() => {
+      setAuthenticated(false);
+    });
+
+    supabase.auth.refreshSession().finally(() => {
+      supabase.auth.getSession().then(({ data }) => {
+        const token = data.session?.access_token ?? null;
+        setAuthenticated(Boolean(token));
+        setSessionReady(true);
+      });
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       const token = session?.access_token ?? null;
-      setAuthToken(token);
       setAuthenticated(Boolean(token));
     });
 
