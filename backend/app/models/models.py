@@ -1,6 +1,6 @@
 """Modelos SQLAlchemy de fitnasam."""
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from sqlalchemy import (
     Date,
@@ -17,7 +17,7 @@ from app.core.database import Base
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class User(Base):
@@ -29,9 +29,9 @@ class User(Base):
         DateTime(timezone=True), default=_utcnow
     )
 
-    foods: Mapped[list["Food"]] = relationship(back_populates="user")
-    food_entries: Mapped[list["FoodEntry"]] = relationship(back_populates="user")
-    daily_goals: Mapped[list["DailyGoal"]] = relationship(back_populates="user")
+    foods: Mapped[list[Food]] = relationship(back_populates="user")
+    food_entries: Mapped[list[FoodEntry]] = relationship(back_populates="user")
+    daily_goals: Mapped[list[DailyGoal]] = relationship(back_populates="user")
 
 
 class Food(Base):
@@ -52,7 +52,7 @@ class Food(Base):
         DateTime(timezone=True), default=_utcnow
     )
 
-    user: Mapped["User"] = relationship(back_populates="foods")
+    user: Mapped[User] = relationship(back_populates="foods")
 
 
 class FoodEntry(Base):
@@ -67,8 +67,8 @@ class FoodEntry(Base):
     )
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
 
-    user: Mapped["User"] = relationship(back_populates="food_entries")
-    food: Mapped["Food"] = relationship()
+    user: Mapped[User] = relationship(back_populates="food_entries")
+    food: Mapped[Food] = relationship()
 
 
 class DailyGoal(Base):
@@ -83,4 +83,4 @@ class DailyGoal(Base):
     carbs_target_g: Mapped[float] = mapped_column(Float, nullable=False)
     fat_target_g: Mapped[float] = mapped_column(Float, nullable=False)
 
-    user: Mapped["User"] = relationship(back_populates="daily_goals")
+    user: Mapped[User] = relationship(back_populates="daily_goals")
