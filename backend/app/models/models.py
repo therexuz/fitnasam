@@ -82,5 +82,6 @@ class DailyGoal(Base):
     protein_target_g: Mapped[float] = mapped_column(Float, nullable=False)
     carbs_target_g: Mapped[float] = mapped_column(Float, nullable=False)
     fat_target_g: Mapped[float] = mapped_column(Float, nullable=False)
+    deficit_percent: Mapped[float] = mapped_column(Float, nullable=False, default=0)
 
     user: Mapped[User] = relationship(back_populates="daily_goals")

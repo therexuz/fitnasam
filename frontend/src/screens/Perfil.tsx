@@ -16,6 +16,7 @@ export default function Perfil() {
   const [altura, setAltura] = useState("");
   const [edad, setEdad] = useState("");
   const [factor, setFactor] = useState("1.375");
+  const [deficit, setDeficit] = useState("15");
   const [result, setResult] = useState<NutritionCalcResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -43,6 +44,11 @@ export default function Perfil() {
       setError("Selecciona tu nivel de actividad.");
       return;
     }
+    const deficitN = parseNum(deficit);
+    if (deficitN == null || deficitN < 0 || deficitN > 30) {
+      setError("Ingresa un déficit válido (0 a 30%).");
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
@@ -54,6 +60,7 @@ export default function Perfil() {
         altura_cm: alturaCm,
         edad: Math.round(edadN),
         factor_actividad: factorN,
+        deficit_percent: deficitN,
       });
       setResult(r);
     } catch (err) {
@@ -75,6 +82,7 @@ export default function Perfil() {
         protein_target_g: result.protein_g,
         carbs_target_g: result.carbs_g,
         fat_target_g: result.fat_g,
+        deficit_percent: result.deficit_percent,
       });
       setMessage("Meta guardada para hoy.");
     } catch (err) {
@@ -141,6 +149,15 @@ export default function Perfil() {
           ))}
         </select>
 
+        <label className="field-label">Déficit calórico (%)</label>
+        <input
+          className="input"
+          inputMode="decimal"
+          value={deficit}
+          onChange={(e) => setDeficit(e.target.value)}
+          placeholder="Ej: 15"
+        />
+
         <button className="btn" onClick={handleCalculate} disabled={loading}>
           {loading ? "Calculando…" : "Calcular metas"}
         </button>
@@ -161,6 +178,10 @@ export default function Perfil() {
             <div>
               <dt>TDEE</dt>
               <dd>{fmt(result.tdee)} kcal</dd>
+            </div>
+            <div>
+              <dt>Déficit aplicado</dt>
+              <dd>{fmt(result.deficit_percent)} %</dd>
             </div>
             <div>
               <dt>Meta calórica</dt>

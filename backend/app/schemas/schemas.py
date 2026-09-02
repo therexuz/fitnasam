@@ -63,6 +63,7 @@ class DailyGoalCreate(BaseModel):
     protein_target_g: float = Field(ge=0)
     carbs_target_g: float = Field(ge=0)
     fat_target_g: float = Field(ge=0)
+    deficit_percent: float = Field(default=0, ge=0, le=30)
 
 
 class DailyGoalOut(BaseModel):
@@ -75,6 +76,7 @@ class DailyGoalOut(BaseModel):
     protein_target_g: float
     carbs_target_g: float
     fat_target_g: float
+    deficit_percent: float
 
 
 class MacroTargetsRequest(BaseModel):
@@ -83,6 +85,7 @@ class MacroTargetsRequest(BaseModel):
     altura_cm: float = Field(gt=0)
     edad: int = Field(gt=0)
     factor_actividad: float = Field(gt=0)
+    deficit_percent: float = Field(default=15, ge=0, le=30)
 
 
 class NutritionCalcResult(BaseModel):
@@ -93,6 +96,7 @@ class NutritionCalcResult(BaseModel):
     protein_g: float
     carbs_g: float
     fat_g: float
+    deficit_percent: float
 
 
 class PortionRequest(BaseModel):

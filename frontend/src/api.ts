@@ -56,6 +56,7 @@ export interface DailyGoal {
   protein_target_g: number;
   carbs_target_g: number;
   fat_target_g: number;
+  deficit_percent: number;
 }
 
 export interface Summary {
@@ -75,6 +76,7 @@ export interface NutritionCalcResult {
   protein_g: number;
   carbs_g: number;
   fat_g: number;
+  deficit_percent: number;
 }
 
 export interface OCRResult {
@@ -168,6 +170,7 @@ export const api = {
     protein_target_g: number;
     carbs_target_g: number;
     fat_target_g: number;
+    deficit_percent: number;
   }): Promise<DailyGoal> {
     return request("/goals", { method: "PUT", body: JSON.stringify(body) });
   },
@@ -177,6 +180,7 @@ export const api = {
     altura_cm: number;
     edad: number;
     factor_actividad: number;
+    deficit_percent: number;
   }): Promise<NutritionCalcResult> {
     return request("/calculate/goals", {
       method: "POST",
