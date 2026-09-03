@@ -134,7 +134,15 @@ export default function Registro({
       {selected && (
         <div className="card selected-food">
           <strong>{selected.name}</strong>
-          <span className="muted"> por 100 g: {fmt(selected.kcal_per_100g)} kcal</span>
+          <span className="muted">
+            {selected.measure_type === "g"
+              ? `por 100 g: ${fmt(selected.kcal_per_100g)} kcal`
+              : selected.measure_weight_g
+                ? `por 1 ${measureLabel[selected.measure_type]}: ${fmt(
+                    (selected.kcal_per_100g * selected.measure_weight_g) / 100,
+                  )} kcal`
+                : `por 100 g: ${fmt(selected.kcal_per_100g)} kcal`}
+          </span>
           <button className="link-btn" onClick={() => setSelected(null)}>
             Cambiar
           </button>
@@ -158,7 +166,13 @@ export default function Registro({
                 }}
               >
                 <span>{f.name}</span>
-                <span className="muted">{fmt(f.kcal_per_100g)} kcal / 100 g</span>
+                <span className="muted">
+                  {f.measure_type === "g"
+                    ? `${fmt(f.kcal_per_100g)} kcal / 100 g`
+                    : f.measure_weight_g
+                      ? `${fmt((f.kcal_per_100g * f.measure_weight_g) / 100)} kcal / 1 ${measureLabel[f.measure_type]}`
+                      : `${fmt(f.kcal_per_100g)} kcal / 100 g`}
+                </span>
               </button>
               <button
                 className="link-btn delete-btn"
@@ -204,12 +218,21 @@ export default function Registro({
             onChange={(e) => setQty(e.target.value)}
           />
 
-          {selected.standard_portion_g && (
+          {selected.measure_type === "g" && selected.standard_portion_g && (
             <button
               className="link-btn"
               onClick={() => setQty(String(selected.standard_portion_g))}
             >
               Usar porción ({fmt(selected.standard_portion_g)} g)
+            </button>
+          )}
+
+          {selected.measure_type !== "g" && (
+            <button
+              className="link-btn"
+              onClick={() => setQty("1")}
+            >
+              Usar 1 {measureLabel[selected.measure_type]}
             </button>
           )}
 

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { api, type MeasureType } from "../api";
-import { fmt, parseNum } from "../utils";
+import { parseNum } from "../utils";
 import type { Tab } from "../types";
 
 interface Form {
   name: string;
-  portionBase: string;
+  referenceWeight: string;
   kcal: string;
   protein: string;
   carbs: string;
@@ -14,12 +14,11 @@ interface Form {
   fibre: string;
   sugar: string;
   measureType: MeasureType;
-  measureWeight: string;
 }
 
 const emptyForm: Form = {
   name: "",
-  portionBase: "100",
+  referenceWeight: "",
   kcal: "",
   protein: "",
   carbs: "",
@@ -27,8 +26,7 @@ const emptyForm: Form = {
   sodium: "",
   fibre: "",
   sugar: "",
-  measureType: "g",
-  measureWeight: "",
+  measureType: "unidad",
 };
 
 const fields: { key: keyof Form; label: string; optional?: boolean }[] = [
@@ -42,8 +40,8 @@ const fields: { key: keyof Form; label: string; optional?: boolean }[] = [
 ];
 
 const MEASURES: { value: MeasureType; label: string }[] = [
-  { value: "g", label: "Gramos (100 g)" },
-  { value: "unidad", label: "Por unidad (ej: huevo)" },
+  { value: "unidad", label: "Por unidad (huevo, plátano…)" },
+  { value: "g", label: "Gramos" },
   { value: "ml", label: "Mililitros (líquido)" },
 ];
 
@@ -61,22 +59,27 @@ export default function Alimento({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  const portionBase = parseNum(form.portionBase);
-  const factor = portionBase && portionBase > 0 ? 100 / portionBase : 1;
+  const isCount = form.measureType !== "g";
+  const referenceWeight = parseNum(form.referenceWeight);
+  const factor =
+    referenceWeight && referenceWeight > 0 ? 100 / referenceWeight : 1;
 
   function normalize(v: number | null): number | null {
     if (v == null) return null;
     return v * factor;
   }
 
+  const unitLabel =
+    form.measureType === "unidad"
+      ? "1 unidad"
+      : form.measureType === "ml"
+        ? "1 ml"
+        : "1 g";
+
   async function handleSave() {
     const name = form.name.trim();
     if (!name) {
       setError("Ingresa un nombre para el alimento.");
-      return;
-    }
-    if (portionBase == null || portionBase <= 0) {
-      setError("Ingresa los gramos de la porción.");
       return;
     }
     const kcal = normalize(parseNum(form.kcal));
@@ -85,6 +88,10 @@ export default function Alimento({
     const fat = normalize(parseNum(form.fat));
     if (kcal == null && protein == null && carbs == null && fat == null) {
       setError("Ingresa al menos una macro o las calorías.");
+      return;
+    }
+    if (isCount && (referenceWeight == null || referenceWeight <= 0)) {
+      setError("Ingresa el peso de 1 " + form.measureType + " en gramos.");
       return;
     }
     setSaving(true);
@@ -100,10 +107,9 @@ export default function Alimento({
         sodium_mg_per_100g: normalize(parseNum(form.sodium)),
         fibre_g_per_100g: normalize(parseNum(form.fibre)),
         sugar_g_per_100g: normalize(parseNum(form.sugar)),
-        standard_portion_g: portionBase,
+        standard_portion_g: isCount ? referenceWeight : referenceWeight || null,
         measure_type: form.measureType,
-        measure_weight_g:
-          form.measureType !== "g" ? parseNum(form.measureWeight) : null,
+        measure_weight_g: isCount ? referenceWeight : null,
       });
       setMessage(`"${name}" guardado.`);
       setForm(emptyForm);
@@ -121,8 +127,8 @@ export default function Alimento({
       </header>
 
       <p className="muted">
-        Ingresa la porción que sueles consumir y sus valores. Internamente se
-        normaliza a 100 g.
+        Indica cómo lo mides y los valores de una porción. Todo se normaliza a
+        100 g internamente.
       </p>
 
       <div className="card">
@@ -131,21 +137,45 @@ export default function Alimento({
           className="input"
           value={form.name}
           onChange={(e) => update("name", e.target.value)}
-          placeholder="Ej: Yogur protein"
+          placeholder="Ej: Huevo Tottus"
         />
 
-        <label className="field-label">Porción habitual (g)</label>
+        <label className="field-label">Medida</label>
+        <select
+          className="input"
+          value={form.measureType}
+          onChange={(e) => update("measureType", e.target.value as MeasureType)}
+        >
+          {MEASURES.map((m) => (
+            <option key={m.value} value={m.value}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+
+        <label className="field-label">
+          {form.measureType === "unidad"
+            ? "Peso de 1 unidad (g)"
+            : form.measureType === "ml"
+              ? "Peso de 1 ml (g)"
+              : "Peso de la porción (g)"}
+        </label>
         <input
           className="input"
           inputMode="decimal"
-          value={form.portionBase}
-          onChange={(e) => update("portionBase", e.target.value)}
-          placeholder="Ej: 120"
+          value={form.referenceWeight}
+          onChange={(e) => update("referenceWeight", e.target.value)}
+          placeholder={
+            form.measureType === "unidad"
+              ? "Ej: 51"
+              : form.measureType === "ml"
+                ? "Ej: 1"
+                : "Ej: 120"
+          }
         />
 
         <p className="muted">
-          Los valores siguientes son de tu porción de{" "}
-          {portionBase && portionBase > 0 ? fmt(portionBase) : "—"} g.
+          Los valores siguientes son de {unitLabel}.
         </p>
 
         {fields.map((f) => (
@@ -162,36 +192,6 @@ export default function Alimento({
             />
           </div>
         ))}
-
-        <label className="field-label">Medida al registrar</label>
-        <select
-          className="input"
-          value={form.measureType}
-          onChange={(e) => update("measureType", e.target.value as MeasureType)}
-        >
-          {MEASURES.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-
-        {form.measureType !== "g" && (
-          <>
-            <label className="field-label">
-              {form.measureType === "unidad"
-                ? "Gramos por unidad"
-                : "Gramos por ml"}
-            </label>
-            <input
-              className="input"
-              inputMode="decimal"
-              value={form.measureWeight}
-              onChange={(e) => update("measureWeight", e.target.value)}
-              placeholder="Ej: 50"
-            />
-          </>
-        )}
 
         <button className="btn" onClick={handleSave} disabled={saving}>
           {saving ? "Guardando…" : "Guardar alimento"}
