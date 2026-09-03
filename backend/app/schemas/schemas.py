@@ -86,6 +86,7 @@ class MacroTargetsRequest(BaseModel):
     edad: int = Field(gt=0)
     factor_actividad: float = Field(gt=0)
     deficit_percent: float = Field(default=15, ge=0, le=30)
+    protein_per_kg: float = Field(default=2.0, ge=1.6, le=2.2)
 
 
 class NutritionCalcResult(BaseModel):
@@ -97,6 +98,7 @@ class NutritionCalcResult(BaseModel):
     carbs_g: float
     fat_g: float
     deficit_percent: float
+    protein_per_kg: float
 
 
 class PortionRequest(BaseModel):

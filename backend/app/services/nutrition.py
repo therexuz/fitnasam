@@ -17,9 +17,14 @@ def tdee(tmb: float, factor_actividad: float) -> float:
     return tmb * factor_actividad
 
 
-def macro_targets(peso_kg: float, tdee: float, deficit: float = 0.15) -> dict:
+def macro_targets(
+    peso_kg: float,
+    tdee: float,
+    deficit: float = 0.15,
+    protein_per_kg: float = 2.0,
+) -> dict:
     kcal = tdee * (1 - deficit)
-    protein_g = peso_kg * 2.0
+    protein_g = peso_kg * protein_per_kg
     fat_g = peso_kg * 0.8
     carbs_g = (kcal - protein_g * 4 - fat_g * 9) / 4
     if carbs_g < 0:

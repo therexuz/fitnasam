@@ -10,6 +10,13 @@ const ACTIVITY = [
   { value: "1.9", label: "Atleta (entrenamiento doble)" },
 ];
 
+const PROTEIN = [
+  { value: "1.6", label: "1.6 g/kg (mantención)" },
+  { value: "1.8", label: "1.8 g/kg (recomposición)" },
+  { value: "2.0", label: "2.0 g/kg (recomposición)" },
+  { value: "2.2", label: "2.2 g/kg (máxima)" },
+];
+
 export default function Perfil({ onLogout }: { onLogout?: () => void }) {
   const [sexo, setSexo] = useState("hombre");
   const [peso, setPeso] = useState("");
@@ -17,6 +24,7 @@ export default function Perfil({ onLogout }: { onLogout?: () => void }) {
   const [edad, setEdad] = useState("");
   const [factor, setFactor] = useState("1.375");
   const [deficit, setDeficit] = useState("15");
+  const [protein, setProtein] = useState("2.0");
   const [result, setResult] = useState<NutritionCalcResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -49,6 +57,11 @@ export default function Perfil({ onLogout }: { onLogout?: () => void }) {
       setError("Ingresa un déficit válido (0 a 30%).");
       return;
     }
+    const proteinN = parseNum(protein);
+    if (proteinN == null || proteinN < 1.6 || proteinN > 2.2) {
+      setError("Ingresa una proteína válida (1.6 a 2.2 g/kg).");
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
@@ -61,6 +74,7 @@ export default function Perfil({ onLogout }: { onLogout?: () => void }) {
         edad: Math.round(edadN),
         factor_actividad: factorN,
         deficit_percent: deficitN,
+        protein_per_kg: proteinN,
       });
       setResult(r);
     } catch (err) {
@@ -157,6 +171,19 @@ export default function Perfil({ onLogout }: { onLogout?: () => void }) {
           onChange={(e) => setDeficit(e.target.value)}
           placeholder="Ej: 15"
         />
+
+        <label className="field-label">Proteína (g por kg de peso)</label>
+        <select
+          className="input"
+          value={protein}
+          onChange={(e) => setProtein(e.target.value)}
+        >
+          {PROTEIN.map((p) => (
+            <option key={p.value} value={p.value}>
+              {p.label}
+            </option>
+          ))}
+        </select>
 
         <button className="btn" onClick={handleCalculate} disabled={loading}>
           {loading ? "Calculando…" : "Calcular metas"}
