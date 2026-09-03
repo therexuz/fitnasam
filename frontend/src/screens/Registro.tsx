@@ -67,9 +67,11 @@ export default function Registro({
 
   const qtyNum = parseNum(qty) ?? 0;
 
+  const unitWeight = selected?.measure_weight_g ?? selected?.standard_portion_g ?? null;
+
   const grams =
-    selected && selected.measure_type !== "g" && selected.measure_weight_g
-      ? qtyNum * selected.measure_weight_g
+    selected && selected.measure_type !== "g" && unitWeight
+      ? qtyNum * unitWeight
       : qtyNum;
 
   const preview =
@@ -137,9 +139,9 @@ export default function Registro({
           <span className="muted">
             {selected.measure_type === "g"
               ? `por 100 g: ${fmt(selected.kcal_per_100g)} kcal`
-              : selected.measure_weight_g
+              : unitWeight
                 ? `por 1 ${measureLabel[selected.measure_type]}: ${fmt(
-                    (selected.kcal_per_100g * selected.measure_weight_g) / 100,
+                    (selected.kcal_per_100g * unitWeight) / 100,
                   )} kcal`
                 : `por 100 g: ${fmt(selected.kcal_per_100g)} kcal`}
           </span>
@@ -169,8 +171,12 @@ export default function Registro({
                 <span className="muted">
                   {f.measure_type === "g"
                     ? `${fmt(f.kcal_per_100g)} kcal / 100 g`
-                    : f.measure_weight_g
-                      ? `${fmt((f.kcal_per_100g * f.measure_weight_g) / 100)} kcal / 1 ${measureLabel[f.measure_type]}`
+                    : f.measure_weight_g ?? f.standard_portion_g
+                      ? `${fmt(
+                          (f.kcal_per_100g *
+                            (f.measure_weight_g ?? f.standard_portion_g ?? 0)) /
+                            100,
+                        )} kcal / 1 ${measureLabel[f.measure_type]}`
                       : `${fmt(f.kcal_per_100g)} kcal / 100 g`}
                 </span>
               </button>
@@ -236,7 +242,7 @@ export default function Registro({
             </button>
           )}
 
-          {selected.measure_type !== "g" && selected.measure_weight_g && (
+          {selected.measure_type !== "g" && unitWeight && (
             <p className="muted">
               {fmt(qtyNum)} {measureLabel[selected.measure_type]} ≈ {fmt(grams)} g
             </p>
