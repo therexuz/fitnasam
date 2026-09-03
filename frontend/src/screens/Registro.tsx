@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, type Food } from "../api";
-import { fmt, parseNum } from "../utils";
+import { fmt, parseNum, todayISO } from "../utils";
 import type { Tab } from "../types";
 
 export default function Registro({
@@ -63,7 +63,7 @@ export default function Registro({
     setError(null);
     setMessage(null);
     try {
-      await api.createFoodEntry({ food_id: selected.id, grams: gramsNum });
+      await api.createFoodEntry({ food_id: selected.id, grams: gramsNum, date: todayISO() });
       setMessage(`${selected.name} registrado.`);
       setGrams("");
       onNavigate("resumen");
