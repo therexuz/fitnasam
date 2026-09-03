@@ -204,6 +204,15 @@ export default function Registro({
             onChange={(e) => setQty(e.target.value)}
           />
 
+          {selected.standard_portion_g && (
+            <button
+              className="link-btn"
+              onClick={() => setQty(String(selected.standard_portion_g))}
+            >
+              Usar porción ({fmt(selected.standard_portion_g)} g)
+            </button>
+          )}
+
           {selected.measure_type !== "g" && selected.measure_weight_g && (
             <p className="muted">
               {fmt(qtyNum)} {measureLabel[selected.measure_type]} ≈ {fmt(grams)} g
