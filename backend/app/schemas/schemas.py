@@ -16,6 +16,8 @@ class FoodCreate(BaseModel):
     fibre_g_per_100g: float | None = Field(default=None, ge=0)
     sugar_g_per_100g: float | None = Field(default=None, ge=0)
     standard_portion_g: float | None = Field(default=None, gt=0)
+    measure_type: str = Field(default="g", pattern="^(g|unidad|ml)$")
+    measure_weight_g: float | None = Field(default=None, gt=0)
 
 
 class FoodOut(BaseModel):
@@ -32,6 +34,8 @@ class FoodOut(BaseModel):
     fibre_g_per_100g: float | None
     sugar_g_per_100g: float | None
     standard_portion_g: float | None
+    measure_type: str
+    measure_weight_g: float | None
     created_at: datetime
 
 
@@ -39,6 +43,7 @@ class FoodEntryCreate(BaseModel):
     food_id: int
     grams: float = Field(gt=0)
     date: date_type | None = None
+    meal_type: str | None = Field(default=None, pattern="^(desayuno|almuerzo|cena|snack)$")
 
 
 class FoodEntryOut(BaseModel):
@@ -48,6 +53,7 @@ class FoodEntryOut(BaseModel):
     user_id: str
     food_id: int
     grams: float
+    meal_type: str | None
     consumed_at: datetime
     date: date_type
     kcal: float

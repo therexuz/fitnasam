@@ -48,6 +48,8 @@ class Food(Base):
     fibre_g_per_100g: Mapped[float | None] = mapped_column(Float, nullable=True)
     sugar_g_per_100g: Mapped[float | None] = mapped_column(Float, nullable=True)
     standard_portion_g: Mapped[float | None] = mapped_column(Float, nullable=True)
+    measure_type: Mapped[str] = mapped_column(String, nullable=False, default="g")
+    measure_weight_g: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow
     )
@@ -62,6 +64,7 @@ class FoodEntry(Base):
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     food_id: Mapped[int] = mapped_column(ForeignKey("foods.id"), nullable=False)
     grams: Mapped[float] = mapped_column(Float, nullable=False)
+    meal_type: Mapped[str | None] = mapped_column(String, nullable=True)
     consumed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow
     )

@@ -104,6 +104,7 @@ async def create_food_entry(
         user_id=user_id,
         food_id=food.id,
         grams=payload.grams,
+        meal_type=payload.meal_type,
         date=payload.date or datetime.now(UTC).date(),
     )
     db.add(entry)
@@ -115,6 +116,7 @@ async def create_food_entry(
         user_id=entry.user_id,
         food_id=entry.food_id,
         grams=entry.grams,
+        meal_type=entry.meal_type,
         consumed_at=entry.consumed_at,
         date=entry.date,
         kcal=macros["kcal"],
@@ -156,6 +158,7 @@ async def list_food_entries(
                 user_id=entry.user_id,
                 food_id=entry.food_id,
                 grams=entry.grams,
+                meal_type=entry.meal_type,
                 consumed_at=entry.consumed_at,
                 date=entry.date,
                 kcal=macros["kcal"],

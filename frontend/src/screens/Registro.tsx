@@ -1,7 +1,20 @@
 import { useEffect, useState } from "react";
-import { api, type Food } from "../api";
+import { api, type Food, type MealType } from "../api";
 import { fmt, parseNum, todayISO } from "../utils";
 import type { Tab } from "../types";
+
+const MEALS: { value: MealType; label: string }[] = [
+  { value: "desayuno", label: "Desayuno" },
+  { value: "almuerzo", label: "Almuerzo" },
+  { value: "cena", label: "Cena" },
+  { value: "snack", label: "Snack" },
+];
+
+const measureLabel: Record<string, string> = {
+  g: "g",
+  unidad: "unidad(es)",
+  ml: "ml",
+};
 
 export default function Registro({
   onNavigate,
@@ -11,7 +24,8 @@ export default function Registro({
   const [query, setQuery] = useState("");
   const [foods, setFoods] = useState<Food[]>([]);
   const [selected, setSelected] = useState<Food | null>(null);
-  const [grams, setGrams] = useState("");
+  const [qty, setQty] = useState("");
+  const [mealType, setMealType] = useState<MealType>("almuerzo");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,33 +53,50 @@ export default function Registro({
     };
   }, [query]);
 
-  const gramsNum = parseNum(grams) ?? 0;
+  const qtyNum = parseNum(qty) ?? 0;
+
+  const grams =
+    selected && selected.measure_type !== "g" && selected.measure_weight_g
+      ? qtyNum * selected.measure_weight_g
+      : qtyNum;
+
   const preview =
-    selected && gramsNum > 0
+    selected && grams > 0
       ? {
-          kcal: (selected.kcal_per_100g * gramsNum) / 100,
-          protein_g: (selected.protein_per_100g * gramsNum) / 100,
-          carbs_g: (selected.carbs_per_100g * gramsNum) / 100,
-          fat_g: (selected.fat_per_100g * gramsNum) / 100,
+          kcal: (selected.kcal_per_100g * grams) / 100,
+          protein_g: (selected.protein_per_100g * grams) / 100,
+          carbs_g: (selected.carbs_per_100g * grams) / 100,
+          fat_g: (selected.fat_per_100g * grams) / 100,
         }
       : null;
+
+  function resetAfterAdd() {
+    setSelected(null);
+    setQty("");
+    setQuery("");
+  }
 
   async function handleAdd() {
     if (!selected) {
       setError("Selecciona un alimento.");
       return;
     }
-    if (gramsNum <= 0) {
-      setError("Ingresa los gramos consumidos.");
+    if (qtyNum <= 0) {
+      setError("Ingresa la cantidad a registrar.");
       return;
     }
     setSaving(true);
     setError(null);
     setMessage(null);
     try {
-      await api.createFoodEntry({ food_id: selected.id, grams: gramsNum, date: todayISO() });
+      await api.createFoodEntry({
+        food_id: selected.id,
+        grams,
+        date: todayISO(),
+        meal_type: mealType,
+      });
       setMessage(`${selected.name} registrado.`);
-      setGrams("");
+      resetAfterAdd();
       onNavigate("resumen");
     } catch (err) {
       setError((err as Error).message);
@@ -102,7 +133,7 @@ export default function Registro({
         <div className="food-list">
           {loading && <p className="muted">Buscando…</p>}
           {!loading && foods.length === 0 && (
-            <p className="muted">No hay alimentos. Crea uno en Escanear.</p>
+            <p className="muted">No hay alimentos. Crea uno en Alimento o Escanear.</p>
           )}
           {foods.map((f) => (
             <button
@@ -111,6 +142,7 @@ export default function Registro({
               onClick={() => {
                 setSelected(f);
                 setQuery("");
+                setQty("");
               }}
             >
               <span>{f.name}</span>
@@ -122,15 +154,43 @@ export default function Registro({
 
       {selected && (
         <div className="card">
-          <label className="field-label">Gramos consumidos</label>
+          <label className="field-label">Tipo de comida</label>
+          <select
+            className="input"
+            value={mealType}
+            onChange={(e) => setMealType(e.target.value as MealType)}
+          >
+            {MEALS.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+
+          <label className="field-label">
+            Cantidad ({measureLabel[selected.measure_type]})
+          </label>
           <input
             type="number"
             inputMode="decimal"
             className="input"
-            placeholder="Ej: 150"
-            value={grams}
-            onChange={(e) => setGrams(e.target.value)}
+            placeholder={
+              selected.measure_type === "g"
+                ? "Ej: 150"
+                : selected.measure_type === "unidad"
+                  ? "Ej: 2"
+                  : "Ej: 250"
+            }
+            value={qty}
+            onChange={(e) => setQty(e.target.value)}
           />
+
+          {selected.measure_type !== "g" && selected.measure_weight_g && (
+            <p className="muted">
+              {fmt(qtyNum)} {measureLabel[selected.measure_type]} ≈ {fmt(grams)} g
+            </p>
+          )}
+
           {preview && (
             <div className="preview">
               <div>
@@ -151,6 +211,7 @@ export default function Registro({
               </div>
             </div>
           )}
+
           <button className="btn" onClick={handleAdd} disabled={saving}>
             {saving ? "Guardando…" : "Agregar"}
           </button>

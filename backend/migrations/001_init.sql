@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS foods (
     fibre_g_per_100g     DOUBLE PRECISION,
     sugar_g_per_100g     DOUBLE PRECISION,
     standard_portion_g   DOUBLE PRECISION,
+    measure_type         TEXT NOT NULL DEFAULT 'g',
+    measure_weight_g     DOUBLE PRECISION,
     created_at           TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -29,6 +31,7 @@ CREATE TABLE IF NOT EXISTS food_entries (
     user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     food_id      INT NOT NULL REFERENCES foods(id) ON DELETE CASCADE,
     grams        DOUBLE PRECISION NOT NULL,
+    meal_type    TEXT,
     consumed_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     date         DATE NOT NULL
 );
