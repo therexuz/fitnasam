@@ -23,9 +23,11 @@ def _resolve_url() -> str:
     if not url:
         return ""
     if url.startswith("postgresql://"):
-        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    if url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql+asyncpg://", 1)
+        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    elif url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+    if "+asyncpg://" in url:
+        url = url.replace("sslmode=require", "ssl=require")
     return url
 
 
