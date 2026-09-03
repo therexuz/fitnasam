@@ -88,6 +88,7 @@ export interface NutritionCalcResult {
   carbs_g: number;
   fat_g: number;
   deficit_percent: number;
+  protein_per_kg: number;
 }
 
 export interface OCRResult {
@@ -198,6 +199,7 @@ export const api = {
     edad: number;
     factor_actividad: number;
     deficit_percent: number;
+    protein_per_kg: number;
   }): Promise<NutritionCalcResult> {
     return request("/calculate/goals", {
       method: "POST",

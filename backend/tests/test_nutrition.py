@@ -47,6 +47,14 @@ def test_macro_targets_zero_deficit():
     assert targets["kcal"] == pytest.approx(2800.0, abs=0.1)
 
 
+def test_macro_targets_custom_protein_per_kg():
+    targets = nutrition.macro_targets(80, 2800, 0.15, 2.2)
+    assert targets["protein_g"] == pytest.approx(176.0, abs=0.1)
+    assert targets["fat_g"] == pytest.approx(64.0, abs=0.1)
+    expected_carbs = (2380 - 176 * 4 - 64 * 9) / 4
+    assert targets["carbs_g"] == pytest.approx(expected_carbs, abs=0.1)
+
+
 def test_rule_of_three_half_portion():
     food = {
         "kcal_per_100g": 200,
