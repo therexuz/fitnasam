@@ -111,6 +111,9 @@ export default function Resumen({
                   <div>
                     <strong>{e.food_name}</strong>
                     <span className="muted"> {fmt(e.grams)} g</span>
+                    {e.meal_type && (
+                      <span className="muted"> · {e.meal_type}</span>
+                    )}
                   </div>
                   <div className="entry-macros">
                     <span>{fmt(e.kcal)} kcal</span>

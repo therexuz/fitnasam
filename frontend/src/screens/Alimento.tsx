@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "../api";
+import { api, type MeasureType } from "../api";
 import { parseNum } from "../utils";
 import type { Tab } from "../types";
 
@@ -13,6 +13,8 @@ interface Form {
   fibre: string;
   sugar: string;
   portion: string;
+  measureType: MeasureType;
+  measureWeight: string;
 }
 
 const emptyForm: Form = {
@@ -25,6 +27,8 @@ const emptyForm: Form = {
   fibre: "",
   sugar: "",
   portion: "",
+  measureType: "g",
+  measureWeight: "",
 };
 
 const fields: { key: keyof Form; label: string; optional?: boolean }[] = [
@@ -38,6 +42,12 @@ const fields: { key: keyof Form; label: string; optional?: boolean }[] = [
   { key: "portion", label: "Porción estándar (g)", optional: true },
 ];
 
+const MEASURES: { value: MeasureType; label: string }[] = [
+  { value: "g", label: "Gramos (100 g)" },
+  { value: "unidad", label: "Por unidad (ej: huevo)" },
+  { value: "ml", label: "Mililitros (líquido)" },
+];
+
 export default function Alimento({
   onNavigate,
 }: {
@@ -48,7 +58,7 @@ export default function Alimento({
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  function update(key: keyof Form, value: string) {
+  function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
@@ -80,6 +90,9 @@ export default function Alimento({
         fibre_g_per_100g: parseNum(form.fibre),
         sugar_g_per_100g: parseNum(form.sugar),
         standard_portion_g: parseNum(form.portion),
+        measure_type: form.measureType,
+        measure_weight_g:
+          form.measureType !== "g" ? parseNum(form.measureWeight) : null,
       });
       setMessage(`"${name}" guardado.`);
       setForm(emptyForm);
@@ -121,6 +134,36 @@ export default function Alimento({
             />
           </div>
         ))}
+
+        <label className="field-label">Medida</label>
+        <select
+          className="input"
+          value={form.measureType}
+          onChange={(e) => update("measureType", e.target.value as MeasureType)}
+        >
+          {MEASURES.map((m) => (
+            <option key={m.value} value={m.value}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+
+        {form.measureType !== "g" && (
+          <>
+            <label className="field-label">
+              {form.measureType === "unidad"
+                ? "Gramos por unidad"
+                : "Gramos por ml"}
+            </label>
+            <input
+              className="input"
+              inputMode="decimal"
+              value={form.measureWeight}
+              onChange={(e) => update("measureWeight", e.target.value)}
+              placeholder="Ej: 50"
+            />
+          </>
+        )}
 
         <button className="btn" onClick={handleSave} disabled={saving}>
           {saving ? "Guardando…" : "Guardar alimento"}

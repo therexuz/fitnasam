@@ -18,6 +18,9 @@ async function getToken(): Promise<string | null> {
   }
 }
 
+export type MeasureType = "g" | "unidad" | "ml";
+export type MealType = "desayuno" | "almuerzo" | "cena" | "snack";
+
 export interface Food {
   id: number;
   user_id: string;
@@ -30,6 +33,8 @@ export interface Food {
   fibre_g_per_100g: number | null;
   sugar_g_per_100g: number | null;
   standard_portion_g: number | null;
+  measure_type: MeasureType;
+  measure_weight_g: number | null;
   created_at: string;
 }
 
@@ -43,6 +48,8 @@ export interface FoodCreate {
   fibre_g_per_100g?: number | null;
   sugar_g_per_100g?: number | null;
   standard_portion_g?: number | null;
+  measure_type?: MeasureType;
+  measure_weight_g?: number | null;
 }
 
 export interface FoodEntry {
@@ -50,6 +57,7 @@ export interface FoodEntry {
   user_id: string;
   food_id: number;
   grams: number;
+  meal_type: MealType | null;
   consumed_at: string;
   date: string;
   kcal: number;
@@ -170,6 +178,7 @@ export const api = {
     food_id: number;
     grams: number;
     date?: string;
+    meal_type?: MealType | null;
   }): Promise<FoodEntry> {
     return request("/food-entries", {
       method: "POST",
