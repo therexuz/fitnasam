@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { api, type MeasureType } from "../api";
-import { parseNum } from "../utils";
+import { fmt, parseNum } from "../utils";
 import type { Tab } from "../types";
 
 interface Form {
   name: string;
+  portionBase: string;
   kcal: string;
   protein: string;
   carbs: string;
@@ -12,13 +13,13 @@ interface Form {
   sodium: string;
   fibre: string;
   sugar: string;
-  portion: string;
   measureType: MeasureType;
   measureWeight: string;
 }
 
 const emptyForm: Form = {
   name: "",
+  portionBase: "100",
   kcal: "",
   protein: "",
   carbs: "",
@@ -26,7 +27,6 @@ const emptyForm: Form = {
   sodium: "",
   fibre: "",
   sugar: "",
-  portion: "",
   measureType: "g",
   measureWeight: "",
 };
@@ -39,7 +39,6 @@ const fields: { key: keyof Form; label: string; optional?: boolean }[] = [
   { key: "sodium", label: "Sodio (mg)", optional: true },
   { key: "fibre", label: "Fibra (g)", optional: true },
   { key: "sugar", label: "Azúcar (g)", optional: true },
-  { key: "portion", label: "Porción estándar (g)", optional: true },
 ];
 
 const MEASURES: { value: MeasureType; label: string }[] = [
@@ -62,16 +61,28 @@ export default function Alimento({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  const portionBase = parseNum(form.portionBase);
+  const factor = portionBase && portionBase > 0 ? 100 / portionBase : 1;
+
+  function normalize(v: number | null): number | null {
+    if (v == null) return null;
+    return v * factor;
+  }
+
   async function handleSave() {
     const name = form.name.trim();
     if (!name) {
       setError("Ingresa un nombre para el alimento.");
       return;
     }
-    const kcal = parseNum(form.kcal);
-    const protein = parseNum(form.protein);
-    const carbs = parseNum(form.carbs);
-    const fat = parseNum(form.fat);
+    if (portionBase == null || portionBase <= 0) {
+      setError("Ingresa los gramos de la porción.");
+      return;
+    }
+    const kcal = normalize(parseNum(form.kcal));
+    const protein = normalize(parseNum(form.protein));
+    const carbs = normalize(parseNum(form.carbs));
+    const fat = normalize(parseNum(form.fat));
     if (kcal == null && protein == null && carbs == null && fat == null) {
       setError("Ingresa al menos una macro o las calorías.");
       return;
@@ -86,10 +97,10 @@ export default function Alimento({
         protein_per_100g: protein ?? 0,
         carbs_per_100g: carbs ?? 0,
         fat_per_100g: fat ?? 0,
-        sodium_mg_per_100g: parseNum(form.sodium),
-        fibre_g_per_100g: parseNum(form.fibre),
-        sugar_g_per_100g: parseNum(form.sugar),
-        standard_portion_g: parseNum(form.portion),
+        sodium_mg_per_100g: normalize(parseNum(form.sodium)),
+        fibre_g_per_100g: normalize(parseNum(form.fibre)),
+        sugar_g_per_100g: normalize(parseNum(form.sugar)),
+        standard_portion_g: portionBase,
         measure_type: form.measureType,
         measure_weight_g:
           form.measureType !== "g" ? parseNum(form.measureWeight) : null,
@@ -109,7 +120,10 @@ export default function Alimento({
         <h1>Agregar alimento</h1>
       </header>
 
-      <p className="muted">Ingresa los valores por 100 g del producto.</p>
+      <p className="muted">
+        Ingresa la porción que sueles consumir y sus valores. Internamente se
+        normaliza a 100 g.
+      </p>
 
       <div className="card">
         <label className="field-label">Nombre</label>
@@ -117,8 +131,22 @@ export default function Alimento({
           className="input"
           value={form.name}
           onChange={(e) => update("name", e.target.value)}
-          placeholder="Ej: Yogur natural"
+          placeholder="Ej: Yogur protein"
         />
+
+        <label className="field-label">Porción habitual (g)</label>
+        <input
+          className="input"
+          inputMode="decimal"
+          value={form.portionBase}
+          onChange={(e) => update("portionBase", e.target.value)}
+          placeholder="Ej: 120"
+        />
+
+        <p className="muted">
+          Los valores siguientes son de tu porción de{" "}
+          {portionBase && portionBase > 0 ? fmt(portionBase) : "—"} g.
+        </p>
 
         {fields.map((f) => (
           <div key={f.key}>
@@ -135,7 +163,7 @@ export default function Alimento({
           </div>
         ))}
 
-        <label className="field-label">Medida</label>
+        <label className="field-label">Medida al registrar</label>
         <select
           className="input"
           value={form.measureType}
