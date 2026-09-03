@@ -14,6 +14,7 @@ export default function Resumen({
   const [entries, setEntries] = useState<FoodEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,7 +35,17 @@ export default function Resumen({
     return () => {
       cancelled = true;
     };
-  }, [date]);
+  }, [date, refreshing]);
+
+  async function handleDeleteEntry(entryId: number) {
+    if (!window.confirm("¿Eliminar este registro?")) return;
+    try {
+      await api.deleteFoodEntry(entryId);
+      setRefreshing((r) => !r);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
 
   const goal = summary?.goal ?? null;
 
@@ -108,12 +119,21 @@ export default function Resumen({
             <ul className="entry-list">
               {entries.map((e) => (
                 <li key={e.id} className="card entry">
-                  <div>
-                    <strong>{e.food_name}</strong>
-                    <span className="muted"> {fmt(e.grams)} g</span>
-                    {e.meal_type && (
-                      <span className="muted"> · {e.meal_type}</span>
-                    )}
+                  <div className="entry-head">
+                    <div>
+                      <strong>{e.food_name}</strong>
+                      <span className="muted"> {fmt(e.grams)} g</span>
+                      {e.meal_type && (
+                        <span className="muted"> · {e.meal_type}</span>
+                      )}
+                    </div>
+                    <button
+                      className="link-btn delete-btn"
+                      onClick={() => handleDeleteEntry(e.id)}
+                      aria-label="Eliminar registro"
+                    >
+                      Eliminar
+                    </button>
                   </div>
                   <div className="entry-macros">
                     <span>{fmt(e.kcal)} kcal</span>

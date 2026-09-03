@@ -174,6 +174,9 @@ export const api = {
     const query = q ? `?q=${encodeURIComponent(q)}` : "";
     return request(`/foods${query}`);
   },
+  deleteFood(foodId: number): Promise<void> {
+    return request(`/foods/${foodId}`, { method: "DELETE" });
+  },
   createFoodEntry(body: {
     food_id: number;
     grams: number;
@@ -187,6 +190,9 @@ export const api = {
   },
   listFoodEntries(date: string): Promise<FoodEntry[]> {
     return request(`/food-entries?date=${encodeURIComponent(date)}`);
+  },
+  deleteFoodEntry(entryId: number): Promise<void> {
+    return request(`/food-entries/${entryId}`, { method: "DELETE" });
   },
   getSummary(date: string): Promise<Summary> {
     return request(`/summary?date=${encodeURIComponent(date)}`);
