@@ -3,7 +3,7 @@
 from datetime import UTC, date, datetime
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user_id_required
@@ -75,6 +75,43 @@ async def list_foods(
     stmt = stmt.order_by(Food.created_at.desc())
     result = await db.execute(stmt)
     return result.scalars().all()
+
+
+@router.delete("/foods/{food_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_food(
+    food_id: int,
+    user_id: str = Depends(get_current_user_id_required),
+    db: AsyncSession = Depends(get_db),
+):
+    food = await db.get(Food, food_id)
+    if food is None or food.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Alimento no encontrado"
+        )
+    await db.execute(
+        delete(FoodEntry).where(
+            FoodEntry.food_id == food_id, FoodEntry.user_id == user_id
+        )
+    )
+    await db.delete(food)
+    await db.commit()
+    return
+
+
+@router.delete("/food-entries/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_food_entry(
+    entry_id: int,
+    user_id: str = Depends(get_current_user_id_required),
+    db: AsyncSession = Depends(get_db),
+):
+    entry = await db.get(FoodEntry, entry_id)
+    if entry is None or entry.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Registro no encontrado"
+        )
+    await db.delete(entry)
+    await db.commit()
+    return
 
 
 @router.post("/food-entries", response_model=FoodEntryOut, status_code=status.HTTP_201_CREATED)

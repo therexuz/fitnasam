@@ -28,6 +28,7 @@ export default function Registro({
   const [mealType, setMealType] = useState<MealType>("almuerzo");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -51,7 +52,18 @@ export default function Registro({
       cancelled = true;
       clearTimeout(t);
     };
-  }, [query]);
+  }, [query, refreshing]);
+
+  async function handleDeleteFood(food: Food) {
+    if (!window.confirm(`¿Eliminar "${food.name}" y sus registros?`)) return;
+    try {
+      await api.deleteFood(food.id);
+      setSelected(null);
+      setRefreshing((r) => !r);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
 
   const qtyNum = parseNum(qty) ?? 0;
 
@@ -136,18 +148,25 @@ export default function Registro({
             <p className="muted">No hay alimentos. Crea uno en Alimento o Escanear.</p>
           )}
           {foods.map((f) => (
-            <button
-              key={f.id}
-              className="card food-item"
-              onClick={() => {
-                setSelected(f);
-                setQuery("");
-                setQty("");
-              }}
-            >
-              <span>{f.name}</span>
-              <span className="muted">{fmt(f.kcal_per_100g)} kcal / 100 g</span>
-            </button>
+            <div key={f.id} className="card food-item">
+              <button
+                className="food-item-main"
+                onClick={() => {
+                  setSelected(f);
+                  setQuery("");
+                  setQty("");
+                }}
+              >
+                <span>{f.name}</span>
+                <span className="muted">{fmt(f.kcal_per_100g)} kcal / 100 g</span>
+              </button>
+              <button
+                className="link-btn delete-btn"
+                onClick={() => handleDeleteFood(f)}
+              >
+                Eliminar
+              </button>
+            </div>
           ))}
         </div>
       )}

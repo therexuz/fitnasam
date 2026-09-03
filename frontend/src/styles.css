@@ -276,6 +276,17 @@ body {
   gap: 4px;
 }
 
+.entry-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.delete-btn {
+  color: var(--danger);
+}
+
 .entry-macros {
   display: flex;
   justify-content: space-between;
@@ -298,6 +309,21 @@ body {
   cursor: pointer;
   font-size: 1rem;
   color: var(--text);
+}
+
+.food-item-main {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 }
 
 .selected-food {
