@@ -5,6 +5,7 @@ const items: { id: Tab; label: string }[] = [
   { id: "resumen", label: "Resumen" },
   { id: "registro", label: "Registrar" },
   { id: "escaneo", label: "Escanear" },
+  { id: "alimento", label: "Alimento" },
   { id: "perfil", label: "Perfil" },
 ];
 
@@ -53,6 +54,14 @@ function Icon({ id }: { id: Tab }) {
         <svg {...common}>
           <circle cx="12" cy="8" r="4" />
           <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+        </svg>
+      );
+    case "alimento":
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="18" height="18" rx="3" />
+          <path d="M12 8v8" />
+          <path d="M8 12h8" />
         </svg>
       );
     default:

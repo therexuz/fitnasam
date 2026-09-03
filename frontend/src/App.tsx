@@ -3,6 +3,7 @@ import BottomNav from "./components/BottomNav";
 import Resumen from "./screens/Resumen";
 import Registro from "./screens/Registro";
 import Escaneo from "./screens/Escaneo";
+import Alimento from "./screens/Alimento";
 import Perfil from "./screens/Perfil";
 import Auth from "./screens/Auth";
 import { getSupabase } from "./supabase";
@@ -80,6 +81,7 @@ export default function App() {
         {tab === "resumen" && <Resumen onNavigate={setTab} />}
         {tab === "registro" && <Registro onNavigate={setTab} />}
         {tab === "escaneo" && <Escaneo onNavigate={setTab} />}
+        {tab === "alimento" && <Alimento onNavigate={setTab} />}
         {tab === "perfil" && <Perfil onLogout={handleLogout} />}
       </main>
       <BottomNav current={tab} onChange={setTab} />
