@@ -1,1 +1,1 @@
-export type Tab = "resumen" | "registro" | "escaneo" | "perfil";
+export type Tab = "resumen" | "registro" | "escaneo" | "alimento" | "perfil";
